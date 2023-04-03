@@ -9,22 +9,22 @@ def Aqusition(image, samplePercent, mode):
     else:
         print("Height and width of image does not match.")
         sys.Exit()
-    image = image.resize((px,px))
+
     if(mode=="Hadamard"):
+        image = image.resize((px,px))
         hadamard = MakeHadamard(px)
-        hadamardPlus = (hadamard+1)/2
-        hadamardMinus = (1-hadamard)/2
-        print (hadamardMinus)
-        print (hadamardPlus)
+        matrix = hadamard @ image
+        return matrix
 
     elif(mode=="Random"):
-        print("Random")
+        sys.Exit()
+        #random = MakeRandomMatrix(px, image.size[0])
     else:
         print("Error: Avaible modes: Hadamard, Random")
         sys.Exit()
 
 
-def AddNoise():
+def AddNoise(matrix):
     print("Not implemented")
     sys.Exit()
 
@@ -40,7 +40,7 @@ def PlotImage():
 
 def MakeHadamard(px):
     hadamard = np.zeros((px,px))
-    hadamard[0][0] = 1 
+    hadamard[0][0] = 1
     p = 1
     while(p<px):
         for i in range(p):
@@ -54,9 +54,13 @@ def MakeHadamard(px):
         p*=2
     return hadamard
 
+def MakeRandomMatrix(px, size):
+    for i in range(px):
+        randomV = np.random.random(size)
+ 
+    
 image = Image.open("images\photos\Kansas-City.png")
 Aqusition(image=image, samplePercent=10, mode="Hadamard")
-
 
 #SinglePixelCamera.Recovery()
 #SinglePixelCamera.PlotImage()
