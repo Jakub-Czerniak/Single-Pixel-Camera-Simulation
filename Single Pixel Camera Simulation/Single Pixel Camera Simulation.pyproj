@@ -32,6 +32,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="images\photos\Kansas-City.png" />
+    <Content Include="images\photos\sample_256pixel.png" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
