@@ -31,8 +31,33 @@
     <Folder Include="images\photos\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="images\photos\baboon.png" />
+    <Content Include="images\photos\barbara.bmp" />
+    <Content Include="images\photos\boat.png" />
+    <Content Include="images\photos\cameraman.tif" />
+    <Content Include="images\photos\fruits.png" />
+    <Content Include="images\photos\HappyFish.jpg" />
+    <Content Include="images\photos\house.tif" />
+    <Content Include="images\photos\jetplane.tif" />
     <Content Include="images\photos\Kansas-City.png" />
+    <Content Include="images\photos\lake.tif" />
+    <Content Include="images\photos\lena.bmp" />
+    <Content Include="images\photos\lena_color_256.tif" />
+    <Content Include="images\photos\lena_color_512.tif" />
+    <Content Include="images\photos\lena_gray_256.tif" />
+    <Content Include="images\photos\lena_gray_512.tif" />
+    <Content Include="images\photos\livingroom.tif" />
+    <Content Include="images\photos\mandril_color.tif" />
+    <Content Include="images\photos\mandril_gray.tif" />
+    <Content Include="images\photos\peppers.png" />
+    <Content Include="images\photos\peppers_color.tif" />
+    <Content Include="images\photos\peppers_gray.tif" />
+    <Content Include="images\photos\pirate.tif" />
     <Content Include="images\photos\sample_256pixel.png" />
+    <Content Include="images\photos\tulips.png" />
+    <Content Include="images\photos\walkbridge.tif" />
+    <Content Include="images\photos\woman_blonde.tif" />
+    <Content Include="images\photos\woman_darkhair.tif" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

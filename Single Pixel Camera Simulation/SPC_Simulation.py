@@ -3,98 +3,83 @@ import sys
 import numpy as np
 from matplotlib import pyplot as plt
 
+class SinglePixelCamera:
+    def __init__(self, image, samplePercent):
+        if(image.size[0]==image.size[1]):
+            self.imageSize = image.size[0]
+            self.sampleCount = int(self.imageSize ** 2 * samplePercent / 100)
+            self.values = np.empty(self.sampleCount)
+            self.mask = np.zeros((self.imageSize**2,self.imageSize**2))
+            self.image = np.asarray(image)
+        else:
+            sys.exit("Height and width of image does not match.")
 
-def Aqusition(image, samplePercent, mode):
-    if(image.size[0]==image.size[1]):
-        imageSize = image.size[0]
-        sampleCount = int(imageSize ** 2 * samplePercent / 100)
-    else:
-        print("Height and width of image does not match.")
-        sys.Exit()
-    image = np.asarray(image)
-    if(mode=="Hadamard"):
-        hadamard = MakeHadamard(imageSize**2)
+    def PlotOriginal(self):
         plt.figure()
-        plt.imshow(hadamard)
+        plt.imshow(self.image, cmap='gray')
         plt.colorbar()
+        plt.suptitle('Original image')
         plt.show()
-        #print("image")
-        #print(image)
-        values = np.empty(sampleCount)
-        for i in range(sampleCount):
-            maskPlus = (hadamard[i]+1)/2
-            maskMinus = (1-hadamard[i])/2
-            #print(maskPlus)
-            #print(maskMinus)
-            plusValue = maskPlus @ image.flatten()
-            minusValue = maskMinus @ image.flatten()
-            #print("Plus value: " + str(plusValue))
-            #print("Minus value: " + str(minusValue))
-            values[i] = plusValue - minusValue
-            #print(values)
-        print(values)
-        #recover = np.linalg.solve(hadamard[0:sampleCount],values)
-        recover = np.empty(imageSize**2)
-        for j in range(sampleCount):
-            print(hadamard[j])
-            print(values[j])
-            recover += hadamard[j] * values[j]
-            print(recover)
-        recover = recover.reshape(imageSize,imageSize)
 
+    def CreateHadamardMask(self):
+        px = self.imageSize**2
+        self.mask = np.zeros((px,px))
+        self.mask[0][0] = 1
+        p = 1
+        while(p<px):
+            for i in range(p):
+                for j in range(p):
+                    if(i+p<px):
+                        self.mask[i+p][j]=self.mask[i][j]
+                    if(j+p<px):
+                        self.mask[i][j+p]=self.mask[i][j]
+                    if(j+p<px and i+p<px):
+                        self.mask[i+p][j+p]=-self.mask[i][j]
+            p*=2
+
+    def CreateRandomMask(self):
+        self.CreateHadamardMask()
+        np.random.shuffle(self.mask)
+
+    def PlotMask(self):
         plt.figure()
-        plt.imshow(recover)
+        plt.imshow(self.mask, cmap='gray')
         plt.colorbar()
+        plt.suptitle('Mask')
         plt.show()
-        print(recover)
 
-    elif(mode=="Random"):
-        sys.Exit()
-        #random = MakeRandomMatrix(px, image.size[0])
-    else:
-        print("Error: Avaible modes: Hadamard, Random")
-        sys.Exit()
+    def Aqusition(self):
+        for i in range(self.sampleCount):
+            maskPlus = (self.mask[i]+1)/2
+            maskMinus = (1-self.mask[i])/2
+            plusValue = maskPlus @ self.image.flatten()
+            minusValue = maskMinus @ self.image.flatten()
+            self.values[i] = plusValue - minusValue
 
+    def AddNoise(self):
+        sys.exit("Not implemented")
 
-def AddNoise(matrix):
-    print("Not implemented")
-    sys.Exit()
+    def Recover(self):
+        self.recovered = np.empty(self.imageSize**2)
+        for j in range(self.sampleCount):
+            self.recovered += self.mask[j] * self.values[j] / self.imageSize**2
+        self.recovered = self.recovered.reshape(self.imageSize,self.imageSize)
 
-
-def Recovery(values):
-    print("Not implemented")
-    sys.Exit()
-
-
-def PlotImage():
-    print("Not implemented")
-    sys.Exit()
-
-def MakeHadamard(px):
-    hadamard = np.zeros((px,px))
-    hadamard[0][0] = 1
-    p = 1
-    while(p<px):
-        for i in range(p):
-            for j in range(p):
-                if(i+p<px):
-                    hadamard[i+p][j]=hadamard[i][j]
-                if(j+p<px):
-                    hadamard[i][j+p]=hadamard[i][j]
-                if(j+p<px and i+p<px):
-                    hadamard[i+p][j+p]=-hadamard[i][j]
-        p*=2
-    return hadamard
-
-def MakeRandomMatrix(px, size):
-    for i in range(px):
-        randomV = np.random.random(size)
+    def PlotRecovered(self):
+        plt.figure()
+        plt.imshow(self.recovered, cmap='gray')
+        plt.colorbar()
+        plt.suptitle('Recovered image')
+        plt.show()
  
     
-image = Image.open("images\photos\sample_256pixel.png")
+image = Image.open("images\photos\cameraman.tif")
 image = image.convert('L')
-
-Aqusition(image=image, samplePercent=100, mode="Hadamard")
-
-#SinglePixelCamera.Recovery()
-#SinglePixelCamera.PlotImage()
+image = image.resize((128,128))
+spc = SinglePixelCamera(image=image, samplePercent=20)
+spc.CreateRandomMask()
+spc.PlotMask()
+spc.Aqusition()
+spc.PlotOriginal()
+spc.Recover()
+spc.PlotRecovered()
