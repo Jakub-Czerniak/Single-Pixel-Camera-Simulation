@@ -2,6 +2,7 @@ from PIL import Image
 import sys
 import numpy as np
 from matplotlib import pyplot as plt
+from skimage import measure
 
 class SinglePixelCamera:
     def __init__(self, image, samplePercent):
@@ -41,6 +42,39 @@ class SinglePixelCamera:
         self.CreateHadamardMask()
         np.random.shuffle(self.mask)
 
+    def CreateCakeCuttingMask(self):
+        self.CreateHadamardMask()
+        numberOfConnected = np.zeros(self.imageSize**2)
+        for rowNumber, row in enumerate(self.mask):
+            matrix = row.reshape(self.imageSize,self.imageSize)
+            numberOfConnected[rowNumber]= measure.label(label_image=matrix, return_num=True, connectivity=1)[1]
+        indices = np.argsort(numberOfConnected)
+        self.mask = self.mask.take(indices, 0)
+
+    def CreateWalshMask(self):
+        self.CreateHadamardMask()
+        numberOfConnected = np.zeros(self.imageSize**2)
+        for rowNumber, row in enumerate(self.mask):
+            numberOfConnected[rowNumber]= measure.label(label_image=row, return_num=True, connectivity=1)[1]
+        indices = np.argsort(numberOfConnected)
+        self.mask = self.mask.take(indices, 0)
+
+    def CreateHighFrequencyMask(self):
+        self.CreateHadamardMask()
+        numberOfConnected = np.zeros(self.imageSize**2)
+        for rowNumber, row in enumerate(self.mask):
+            numberOfConnected[rowNumber]= measure.label(label_image=row, return_num=True, connectivity=1)[1]
+        indices = np.argsort(numberOfConnected)
+        self.mask = self.mask.take(indices[::-1], 0)
+
+    def SaveMaskToFile(self, file):
+        with open(file=file, mode='wb+') as f:
+            np.save(f, self.mask)
+
+    def ReadMaskFromFile(self, file):
+        with open(file=file, mode='rb') as f:
+            self.mask=np.load(file=f)
+
     def PlotMask(self):
         plt.figure()
         plt.imshow(self.mask, cmap='gray')
@@ -73,12 +107,14 @@ class SinglePixelCamera:
         plt.show()
  
     
-image = Image.open("images\photos\cameraman.tif")
+image = Image.open("images\photos\lena_gray_256.tif")
 image = image.convert('L')
 image = image.resize((128,128))
-spc = SinglePixelCamera(image=image, samplePercent=20)
-spc.CreateRandomMask()
+spc = SinglePixelCamera(image=image, samplePercent=30)
+#spc.CreateHighFrequencyMask()
+spc.ReadMaskFromFile(file='masks\HighFrequency128.npy')
 spc.PlotMask()
+#spc.SaveMaskToFile(file='masks\HighFrequency128.npy')
 spc.Aqusition()
 spc.PlotOriginal()
 spc.Recover()
