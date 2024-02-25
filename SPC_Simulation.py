@@ -1,5 +1,6 @@
 from PIL import Image
 import sys
+import os
 import numpy as np
 from matplotlib import pyplot as plt
 from skimage import measure
@@ -90,9 +91,6 @@ class SinglePixelCamera:
             minusValue = maskMinus @ self.image.flatten()
             self.values[i] = plusValue - minusValue
 
-    def AddNoise(self):
-        sys.exit("Not implemented")
-
     def Recover(self):
         self.recovered = np.empty(self.imageSize**2)
         for j in range(self.sampleCount):
@@ -105,17 +103,63 @@ class SinglePixelCamera:
         plt.colorbar()
         plt.suptitle('Recovered image')
         plt.show()
- 
-    
-image = Image.open("images\photos\lena_gray_256.tif")
+
+    def SaveRecovered(self, file_name='recovered.tif'):
+        Image.fromarray(normalization_grayscale(self.recovered)).convert('L').save(file_name)
+
+
+def normalization_grayscale(image):
+    img_max = image.max()
+    img_min = image.min()
+    if img_min < 0:
+        image += abs(img_min)
+    if not img_max == 255 and img_min == 0:
+        for i in range(image.shape[0]):
+            for j in range(image.shape[1]):
+                image[i][j] = 255 * (image[i][j] - img_min) / (img_max - img_min)
+    return image.astype(np.uint8)
+
+
+if not os.path.exists('masks/'):
+    os.makedirs('masks/')
+if not os.path.exists('recovered/'):
+    os.makedirs('recovered/')
+
+image = Image.open('photos/lena_gray_256.tif')
 image = image.convert('L')
 image = image.resize((128,128))
-spc = SinglePixelCamera(image=image, samplePercent=30)
-#spc.CreateHighFrequencyMask()
-spc.ReadMaskFromFile(file='masks\HighFrequency128.npy')
-spc.PlotMask()
-#spc.SaveMaskToFile(file='masks\HighFrequency128.npy')
+spc = SinglePixelCamera(image=image, samplePercent=50)
+spc.ReadMaskFromFile(file='masks/HighFrequency128.npy')
 spc.Aqusition()
 spc.PlotOriginal()
 spc.Recover()
 spc.PlotRecovered()
+spc.SaveRecovered('recovered/HighFreq50_128.tif')
+
+spc.ReadMaskFromFile(file='masks/Hadamard128.npy')
+spc.Aqusition()
+spc.PlotOriginal()
+spc.Recover()
+spc.PlotRecovered()
+spc.SaveRecovered('recovered/Hadamard50_128.tif')
+
+spc.ReadMaskFromFile(file='masks/Random128.npy')
+spc.Aqusition()
+spc.PlotOriginal()
+spc.Recover()
+spc.PlotRecovered()
+spc.SaveRecovered('recovered/Random50_128.tif')
+
+spc.ReadMaskFromFile(file='masks/Walsh128.npy')
+spc.Aqusition()
+spc.PlotOriginal()
+spc.Recover()
+spc.PlotRecovered()
+spc.SaveRecovered('recovered/Walsh50_128.tif')
+
+spc.ReadMaskFromFile(file='masks/CakeCutting128.npy')
+spc.Aqusition()
+spc.PlotOriginal()
+spc.Recover()
+spc.PlotRecovered()
+spc.SaveRecovered('recovered/CakeCutting50_128.tif')
